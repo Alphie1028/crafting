@@ -1,16 +1,18 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as PIXI from 'pixi.js';
 
-const GameBoard = () => {
+const GameBoard = ({ children }) => {
   const containerRef = useRef(null);
+  const [app, setApp] = useState(null);
+  const [gameContainer, setGameContainer] = useState(null);
 
   useEffect(() => {
     (async () => {
       const size = window.innerWidth * 0.75;
       const canvas = document.createElement('canvas');
 
-      const app = new PIXI.Application();
-      await app.init({
+      const appInstance = new PIXI.Application();
+      await appInstance.init({
         canvas,
         width: size,
         height: size,
@@ -22,12 +24,7 @@ const GameBoard = () => {
         containerRef.current.appendChild(canvas);
       }
 
-      const boardBounds = {
-        x: 0,
-        y: 0,
-        width: size,
-        height: size,
-      };
+      const boardBounds = { x: 0, y: 0, width: size, height: size };
 
       const border = new PIXI.Graphics();
       border.setStrokeStyle({
@@ -38,19 +35,23 @@ const GameBoard = () => {
       });
       border.rect(boardBounds.x, boardBounds.y, boardBounds.width, boardBounds.height);
       border.stroke();
-      app.stage.addChild(border);
+      appInstance.stage.addChild(border);
+
+      const gameContainerInstance = new PIXI.Container();
+      appInstance.stage.addChild(gameContainerInstance);
 
       const maskShape = new PIXI.Graphics();
       maskShape.rect(boardBounds.x, boardBounds.y, boardBounds.width, boardBounds.height);
-      maskShape.fill({ color: 0xffffff, alpha: 1 });
-      app.stage.addChild(maskShape);
+      maskShape.fill({ color: 0xffffff });
+      maskShape.alpha = 0.001;
+      appInstance.stage.addChild(maskShape);
+      gameContainerInstance.mask = maskShape;
 
-      const gameContainer = new PIXI.Container();
-      app.stage.addChild(gameContainer);
-      gameContainer.mask = maskShape;
+      setApp(appInstance);
+      setGameContainer(gameContainerInstance);
 
       return () => {
-        app.destroy(true, { children: true });
+        appInstance.destroy(true, { children: true });
       };
     })();
   }, []);
@@ -70,7 +71,11 @@ const GameBoard = () => {
         left: '50%',
         transform: 'translate(-50%, -50%)',
       }}
-    />
+    >
+      {app && gameContainer && React.Children.map(children, (child) =>
+        React.cloneElement(child, { app, container: gameContainer })
+      )}
+    </div>
   );
 };
 
