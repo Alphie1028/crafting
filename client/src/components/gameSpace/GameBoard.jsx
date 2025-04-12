@@ -55,6 +55,8 @@ const GameBoard = ({ children }) => {
       };
     })();
   }, []);
+  
+  const [collisionRects] = useState([]);
 
   return (
     <div
@@ -73,10 +75,15 @@ const GameBoard = ({ children }) => {
       }}
     >
       {app && gameContainer && React.Children.map(children, (child) =>
-        React.cloneElement(child, { app, container: gameContainer })
+        React.cloneElement(child, {
+          app,
+          container: gameContainer,
+          collisionRects,
+        })
       )}
     </div>
   );
+
 };
 
 export default GameBoard;

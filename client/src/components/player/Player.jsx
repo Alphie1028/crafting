@@ -3,7 +3,13 @@ import * as PIXI from 'pixi.js';
 
 const SPEED = 5;
 
-const Player = ({ app, container }) => {
+function willCollide(nextX, nextY, rects) {
+  const playerBounds = new PIXI.Rectangle(nextX - 12.5, nextY - 12.5, 25, 25);
+  return rects.some(rect => rect.intersects(playerBounds));
+}
+
+const Player = ({ app, container, collisionRects }) => {
+
   const playerRef = useRef(null);
 
   useEffect(() => {
@@ -33,18 +39,26 @@ const Player = ({ app, container }) => {
     app.ticker.add(() => {
     if (!playerRef.current) return;
 
-    if (keys['w']) player.y -= SPEED;
-    if (keys['s']) player.y += SPEED;
-    if (keys['a']) player.x -= SPEED;
-    if (keys['d']) player.x += SPEED;
+    let nextX = player.x;
+    let nextY = player.y;
+
+    if (keys['w']) nextY -= SPEED;
+    if (keys['s']) nextY += SPEED;
+    if (keys['a']) nextX -= SPEED;
+    if (keys['d']) nextX += SPEED;
 
     const minX = 12.5;
     const maxX = app.screen.width - 12.5;
     const minY = 12.5;
     const maxY = app.screen.height - 12.5;
 
-    player.x = Math.max(minX, Math.min(maxX, player.x));
-    player.y = Math.max(minY, Math.min(maxY, player.y));
+    nextX = Math.max(minX, Math.min(maxX, nextX));
+    nextY = Math.max(minY, Math.min(maxY, nextY));
+
+    if (!willCollide(nextX, nextY, collisionRects)) {
+        player.x = nextX;
+        player.y = nextY;
+    }
     });
 
     return () => {
