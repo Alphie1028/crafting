@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import * as PIXI from 'pixi.js';
 
-const Stone = ({ app, container, collisionRects }) => {
+const Stone = ({ app, container, collisionRects, onGoToTarget }) => {
   useEffect(() => {
     if (!app || !container) return;
 
@@ -33,6 +33,21 @@ const Stone = ({ app, container, collisionRects }) => {
 
         cluster.addChild(rock);
         cluster.rocks.push(rock);
+
+        rock.interactive = true;
+        rock.buttonMode = true;
+        rock.hitArea = new PIXI.Rectangle(0, 0, rockSize, rockSize);
+        rock.targetType = 'rock';
+        rock.size = rockSize;
+        rock.baseColor = 0x808080;
+
+        rock.on('pointerdown', () => {
+          onGoToTarget?.({
+            x: cluster.x + rock.x,
+            y: cluster.y + rock.y,
+            target: rock,
+          });
+        });
       }
 
       const padding = 40;
@@ -61,10 +76,9 @@ const Stone = ({ app, container, collisionRects }) => {
     return () => {
       for (const cluster of stoneClusters) container.removeChild(cluster);
     };
-  }, [app, container, collisionRects]);
+  }, [app, container, collisionRects, onGoToTarget]);
 
   return null;
 };
 
-
-export default Stone;
+export default React.memo(Stone);

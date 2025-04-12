@@ -1,10 +1,16 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import * as PIXI from 'pixi.js';
 
 const GameBoard = ({ children }) => {
   const containerRef = useRef(null);
   const [app, setApp] = useState(null);
   const [gameContainer, setGameContainer] = useState(null);
+  const [collisionRects] = useState([]);
+  const goToTargetRef = useRef(null);
+
+  const handleGoToTarget = (target) => {
+    goToTargetRef.current?.(target);
+  };
 
   useEffect(() => {
     (async () => {
@@ -55,8 +61,20 @@ const GameBoard = ({ children }) => {
       };
     })();
   }, []);
-  
-  const [collisionRects] = useState([]);
+
+  const enhancedChildren = useMemo(() => {
+    if (!app || !gameContainer) return null;
+    return React.Children.map(children, (child) =>
+    React.isValidElement(child)
+    ? React.cloneElement(child, {
+      app,
+      container: gameContainer,
+      collisionRects,
+      onGoToTarget: handleGoToTarget,
+      registerGoToHandler: (cb) => (goToTargetRef.current = cb),
+    }): child
+    );
+  }, [children, app, gameContainer]);
 
   return (
     <div
@@ -74,16 +92,9 @@ const GameBoard = ({ children }) => {
         transform: 'translate(-50%, -50%)',
       }}
     >
-      {app && gameContainer && React.Children.map(children, (child) =>
-        React.cloneElement(child, {
-          app,
-          container: gameContainer,
-          collisionRects,
-        })
-      )}
+      {enhancedChildren}
     </div>
   );
-
 };
 
 export default GameBoard;
