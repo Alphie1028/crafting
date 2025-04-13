@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import './css/inventory.css'
 
-const Inventory = ({ inventory, setInventory }) => {
-    const [draggedItem, setDraggedItem] = useState(null);
-    const [draggedFrom, setDraggedFrom] = useState(null);
+const Inventory = ({ inventory, setInventory, draggedItem, setDraggedItem, draggedFrom, setDraggedFrom, onDrop }) => {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
@@ -14,81 +13,32 @@ const Inventory = ({ inventory, setInventory }) => {
     }, []);
 
     const handleMouseDown = (index, e) => {
-        const slot = inventory[index];
-        if (!slot.type) return;
+    const slot = inventory[index];
+    if (!slot.type) return;
 
-        if (e.shiftKey && slot.count > 1) {
+    if (e.shiftKey && slot.count > 1) {
         const half = Math.floor(slot.count / 2);
         const remaining = slot.count - half;
         const held = { type: slot.type, count: half };
 
         setInventory(prev => {
-            const copy = [...prev];
-            copy[index].count = remaining;
-            return copy;
+        const copy = [...prev];
+        copy[index].count = remaining;
+        return copy;
         });
 
         setDraggedItem(held);
-        setDraggedFrom(null);
-        } else {
+        setDraggedFrom({ container: 'inventory', index });
+    } else {
         setDraggedItem({ ...slot });
-        setDraggedFrom(index);
-        }
+        setDraggedFrom({ container: 'inventory', index });
+    }
     };
 
     const handleMouseUp = (index) => {
-        if (draggedItem && draggedFrom !== null) {
-        setInventory(prev => {
-            const copy = [...prev];
-            const targetSlot = copy[index];
-
-            if (!targetSlot.type) {
-            copy[index] = draggedItem;
-            copy[draggedFrom] = { type: null, count: 0 };
-            } else if (targetSlot.type === draggedItem.type && targetSlot.count < 50) {
-            const space = 50 - targetSlot.count;
-            const transfer = Math.min(space, draggedItem.count);
-            targetSlot.count += transfer;
-            draggedItem.count -= transfer;
-
-            if (draggedItem.count <= 0) {
-                copy[draggedFrom] = { type: null, count: 0 };
-            } else {
-                copy[draggedFrom] = draggedItem;
-            }
-            }
-
-            return copy;
-        });
-
-        setDraggedItem(null);
-        setDraggedFrom(null);
-        } else if (draggedItem && draggedFrom === null) {
-        setInventory(prev => {
-            const copy = [...prev];
-            const targetSlot = copy[index];
-
-            if (!targetSlot.type) {
-            copy[index] = draggedItem;
-            } else if (targetSlot.type === draggedItem.type && targetSlot.count < 50) {
-            const space = 50 - targetSlot.count;
-            const transfer = Math.min(space, draggedItem.count);
-            targetSlot.count += transfer;
-            draggedItem.count -= transfer;
-
-            if (draggedItem.count > 0) {
-                setDraggedItem({ ...draggedItem });
-                return copy;
-            }
-            }
-
-            return copy;
-        });
-
-        setDraggedItem(null);
-        setDraggedFrom(null);
-        }
+    onDrop('inventory', index);
     };
+
 
     const handleWheel = (e, index) => {
         if (!e.shiftKey || !draggedItem) return;
@@ -99,7 +49,6 @@ const Inventory = ({ inventory, setInventory }) => {
         const slot = copy[index];
 
         if (direction > 0) {
-            // Scroll down: held item -> hovered slot
             if ((slot.type === draggedItem.type || !slot.type) && draggedItem.count > 0) {
             if (!slot.type) slot.type = draggedItem.type;
             if (slot.count < 50) {
@@ -109,7 +58,6 @@ const Inventory = ({ inventory, setInventory }) => {
             }
             }
         } else if (direction < 0) {
-            // Scroll up: hovered slot -> held item
             if (slot.type === draggedItem.type && slot.count > 0 && draggedItem.count < 50) {
             slot.count -= 1;
             draggedItem.count += 1;
@@ -130,7 +78,7 @@ const Inventory = ({ inventory, setInventory }) => {
             className="inventory-slot"
             onMouseDown={(e) => handleMouseDown(index, e)}
             onMouseUp={() => handleMouseUp(index)}
-            onWheel={(e) => handleWheel(e, index)}
+            onWheelCapture={(e) => handleWheel(e, index)}
             >
             {slot.type && (
                 <>
@@ -156,7 +104,7 @@ const Inventory = ({ inventory, setInventory }) => {
                 zIndex: 1000,
                 width: '60px',
                 textAlign: 'center',
-                transform: 'translate(-1395px, -1610px)'
+                transform: 'translate(-40.8vw, -90vh)'
             }}
             >
             <div>{draggedItem.type}</div>

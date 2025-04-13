@@ -1,0 +1,20 @@
+.crafting-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5vh;
+    background-color: #f2f2f2;
+    padding: 0.5vh;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    margin: 0 auto;
+    width: fit-content;
+}
+.crafting-slot {
+    aspect-ratio: 1 / 1;
+        width: calc((20vw - (0.5vh * 9) - 1vh) / 10);
+        background-color: #fff;
+        border: 2px solid #999;
+        border-radius: 6px;
+        box-sizing: border-box;
+        user-select: none;
+}
