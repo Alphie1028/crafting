@@ -1,5 +1,5 @@
 .inventory-container {
-  width: 40vw;
+  width: 20vw;
   height: fit-content;
   display: flex;
   flex-wrap: wrap;
@@ -19,7 +19,7 @@
 
 .inventory-slot {
   aspect-ratio: 1 / 1;
-  width: calc((40vw - (0.5vh * 9) - 1vh) / 10);
+  width: calc((20vw - (0.5vh * 9) - 1vh) / 10);
   background-color: #fff;
   border: 2px solid #999;
   border-radius: 6px;

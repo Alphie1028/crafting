@@ -14,7 +14,7 @@ const GameBoard = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      const size = window.innerWidth * 0.75;
+      const size = Math.min(window.innerWidth, window.innerHeight) * 0.75;
       const canvas = document.createElement('canvas');
 
       const appInstance = new PIXI.Application();

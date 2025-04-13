@@ -156,7 +156,7 @@ const Inventory = ({ inventory, setInventory }) => {
                 zIndex: 1000,
                 width: '60px',
                 textAlign: 'center',
-                transform: 'translate(-575px, -1610px)'
+                transform: 'translate(-1395px, -1610px)'
             }}
             >
             <div>{draggedItem.type}</div>
