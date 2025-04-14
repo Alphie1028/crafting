@@ -6,6 +6,7 @@ import Tree from './components/gameSpace/worldObjects/Tree'
 import Stone from './components/gameSpace/worldObjects/Stone'
 import Inventory from './components/interface/Inventory'
 import CraftingSlots from './components/interface/CraftingSlots';
+import CraftingListModal from './components/interface/modals/CraftingListModal';
 
 const initialInventory = Array.from({ length: 20 }, () => ({ type: null, count: 0 }));
 const initialCraftingGrid = Array.from({ length: 4 }, () => ({ type: null, count: 0 }));
@@ -140,7 +141,12 @@ return (
       setDraggedFrom={setDraggedFrom}
       onDrop={handleItemDrop}
     />
-
+    <CraftingListModal
+      craftingGrid={craftingGrid}
+      setCraftingGrid={setCraftingGrid}
+      inventory={inventory}
+      setInventory={setInventory}
+    />
     <Inventory
       inventory={inventory}
       setInventory={setInventory}
