@@ -7,6 +7,7 @@ import Stone from './components/gameSpace/worldObjects/Stone'
 import Inventory from './components/interface/Inventory'
 import CraftingSlots from './components/interface/CraftingSlots';
 import CraftingListModal from './components/interface/modals/CraftingListModal';
+import Caves from './components/gameSpace/worldObjects/Caves';
 
 const initialInventory = Array.from({ length: 20 }, () => ({ type: null, count: 0 }));
 const initialCraftingGrid = Array.from({ length: 4 }, () => ({ type: null, count: 0 }));
@@ -17,6 +18,7 @@ function App() {
   const [draggedFrom, setDraggedFrom] = useState(null);
   const [gameReady, setGameReady] = useState(false);
   const [craftingGrid, setCraftingGrid] = useState(initialCraftingGrid);
+  const [inCave, setInCave] = useState(false);
 
   const handleItemDrop = (targetContainer, targetIndex) => {
     if (!draggedItem || !draggedFrom) return;
@@ -123,12 +125,23 @@ function App() {
     <Tree key="tree" />,
     <Stone key="stone" />,
     <Player key="player" addToInventory={addToInventory} />,
+    <Caves key="caves" inCave={inCave} setInCave={setInCave} />
+  ], [addToInventory]);
+
+  const caveElements = useMemo(() => [
+    <Player key="player-cave" addToInventory={addToInventory} />
   ], [addToInventory]);
 
 return (
   <div className="app-layout">
     <div className="board-wrapper">
+      <div style={{ display: inCave ? 'none' : 'block' }}>
       <GameBoard>{gameElements}</GameBoard>
+      </div>
+
+      <div style={{ display: inCave ? 'block' : 'none' }}>
+        <GameBoard key="cave">{caveElements}</GameBoard>
+      </div>
     </div>
 
   <div className="interface-stack">

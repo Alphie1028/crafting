@@ -1,124 +1,62 @@
 import React, { useEffect } from 'react';
 import * as PIXI from 'pixi.js';
-import CaveEntranceReplica from './CaveEntranceReplica';
-const ENTRANCE_SIZE = 25;
-const CAVE_COLOR = 0x333333;
 
-const Cave = ({ app, container, collisionRects, onGoToTarget, setInCave, inCave, setActiveCave}) => {
+const PLAYER_SIZE = 25;
+const CAVE_SIZE = PLAYER_SIZE * 1.5;
+const MIN_CAVES = 2;
+const MAX_CAVES = 5;
+
+const Caves = ({ app, container, inCave, setInCave }) => {
   useEffect(() => {
     if (!app || !container) return;
 
     const caves = [];
-    const padding = 60;
+    const caveRects = [];
+    const padding = 40;
+    const count = Math.floor(Math.random() * (MAX_CAVES - MIN_CAVES + 1)) + MIN_CAVES;
 
-    for (let i = 0; i < 3; i++) {
-      const x = Math.random() * (app.screen.width - 2 * padding) + padding;
-      const y = Math.random() * (app.screen.height - 2 * padding) + padding;
-
-      const cave = new PIXI.Container();
-
-      // Entrance
-      const entrance = new PIXI.Graphics();
-      entrance.beginFill(0x000000);
-      entrance.drawRect(0, 0, ENTRANCE_SIZE, ENTRANCE_SIZE);
-      entrance.endFill();
-      entrance.x = -ENTRANCE_SIZE / 2;
-      entrance.y = 0;
-      cave.addChild(entrance);
-
-      // Dome shape using squares
-      const squareSize = 10;
-      const layout = [
-        [0,1,1,1,0],
-        [1,1,1,1,1],
-        [1,1,1,1,1]
-      ];
-
-      layout.forEach((row, rowIndex) => {
-        row.forEach((val, colIndex) => {
-          if (val === 1) {
-            const block = new PIXI.Graphics();
-            block.beginFill(CAVE_COLOR);
-            block.drawRect(0, 0, squareSize, squareSize);
-            block.endFill();
-            block.x = (colIndex - 2) * squareSize;
-            block.y = -squareSize * (3 - rowIndex);
-            cave.addChild(block);
-          }
-        });
-      });
-
-      cave.x = x;
-      cave.y = y;
-      container.addChild(cave);
-      caves.push(cave);
-
-      // Entrance bounds for overlap detection
-      const entranceRect = new PIXI.Rectangle(
-        x + entrance.x,
-        y + entrance.y,
-        ENTRANCE_SIZE,
-        ENTRANCE_SIZE
-      );
-
-      app.ticker.add(() => {
-        const player = container.children.find(c => c.width === 25 && c.height === 25);
-        if (!player) return;
-
-        const px = player.x;
-        const py = player.y;
-
-        const overlapX = Math.max(0, Math.min(px + 12.5, entranceRect.x + ENTRANCE_SIZE) - Math.max(px - 12.5, entranceRect.x));
-        const overlapY = Math.max(0, Math.min(py + 12.5, entranceRect.y + ENTRANCE_SIZE) - Math.max(py - 12.5, entranceRect.y));
-        const overlapArea = overlapX * overlapY;
-        const playerArea = 25 * 25;
-if (overlapArea >= playerArea * 0.5) {
-  if (!inCave) {
-    setActiveCave(
-      <CaveEntranceReplica
-        x={x}
-        y={y}
-        entranceX={entrance.x}
-        entranceY={entrance.y}
-      />
-    );
-    setInCave(true);
-  }
-} else {
-  if (inCave) {
-    setInCave(false);
-    setActiveCave(null);
-  }
-}
-
-
-      });
-
-      // Add body collision
-      if (Array.isArray(collisionRects)) {
-        layout.forEach((row, rowIndex) => {
-          row.forEach((val, colIndex) => {
-            if (val === 1) {
-              const rect = new PIXI.Rectangle(
-                x + (colIndex - 2) * squareSize,
-                y - squareSize * (3 - rowIndex),
-                squareSize,
-                squareSize
-              );
-              collisionRects.push(rect);
-            }
-          });
-        });
-      }
+    for (let i = 0; i < count; i++) {
+      const g = new PIXI.Graphics();
+      g.beginFill(0x000000).drawRect(0, 0, CAVE_SIZE, CAVE_SIZE).endFill();
+      g.x = Math.random() * (app.screen.width  - padding*2 - CAVE_SIZE) + padding;
+      g.y = Math.random() * (app.screen.height - padding*2 - CAVE_SIZE) + padding;
+      container.addChild(g);
+      caves.push(g);
+      caveRects.push(new PIXI.Rectangle(g.x, g.y, CAVE_SIZE, CAVE_SIZE));
     }
-    if (inCave && !setInCave) return null;
 
-    return () => {
-      for (const cave of caves) container.removeChild(cave);
+    const onTick = () => {
+      const player = container.children.find(c => c.width === PLAYER_SIZE && c.height === PLAYER_SIZE);
+      if (!player) return;
+
+      caveRects.forEach(rect => {
+        const overlapX = Math.max(0,
+          Math.min(player.x + PLAYER_SIZE/2, rect.x + rect.width) - Math.max(player.x - PLAYER_SIZE/2, rect.x)
+        );
+        
+        const overlapY = Math.max(0,
+          Math.min(player.y + PLAYER_SIZE/2, rect.y + rect.height) - Math.max(player.y - PLAYER_SIZE/2, rect.y)
+        );
+
+        const overlapArea = overlapX * overlapY;
+        const halfPlayerArea = PLAYER_SIZE * PLAYER_SIZE * 0.5;
+
+        if (overlapArea >= halfPlayerArea) {
+          if (!inCave) setInCave(true);
+        } else {
+          if (inCave) setInCave(false);
+        }
+      });
     };
-  }, [app, container, collisionRects, onGoToTarget, setInCave, inCave]);
+
+    app.ticker.add(onTick);
+    return () => {
+      app.ticker.remove(onTick);
+      caves.forEach(c => container.removeChild(c));
+    };
+  }, [app, container, inCave, setInCave]);
 
   return null;
 };
 
-export default React.memo(Cave);
+export default React.memo(Caves);

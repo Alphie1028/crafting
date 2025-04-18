@@ -53,10 +53,11 @@ const Tree = ({ app, container, collisionRects, onGoToTarget }) => {
 
             container.addChild(tree);
             trees.push(tree);
-
             trunk.interactive = true;
             trunk.buttonMode = true;
-            trunk.hitArea = new PIXI.Rectangle(0, 0, 13, 40);
+            const bounds = tree.getLocalBounds();
+            tree.hitArea = new PIXI.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
+
             trunk.targetType = 'tree';
             trunk.baseColor = 0x8B4513;
             trunk.flashHeight = 40;
