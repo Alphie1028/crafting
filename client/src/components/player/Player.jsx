@@ -8,7 +8,7 @@ function willCollide(nextX, nextY, rects) {
     return rects.some(rect => rect.intersects(playerBounds));
 }
 
-const Player = ({ app, container, collisionRects, registerGoToHandler, addToInventory }) => {
+const Player = ({ app, container, collisionRects, registerGoToHandler, addToInventory, playerPositionRef }) => {
     const playerRef = useRef(null);
     const goTo = useRef(null);
     const isBouncingBack = useRef(false);
@@ -50,11 +50,17 @@ const Player = ({ app, container, collisionRects, registerGoToHandler, addToInve
         app.ticker.add((delta) => {
             if (!playerRef.current) return;
 
+            if (playerRef.current) {
+            playerPositionRef.current = {
+                x: playerRef.current.x,
+                y: playerRef.current.y,
+            };
+            }
+
             const player = playerRef.current;
             let dx = 0;
             let dy = 0;
 
-            // WASD cancels go-to
             if (keys['w']) dy -= SPEED;
             if (keys['s']) dy += SPEED;
             if (keys['a']) dx -= SPEED;
@@ -63,7 +69,6 @@ const Player = ({ app, container, collisionRects, registerGoToHandler, addToInve
                 goTo.current = null;
             }
 
-            // Bounce animation (after reaching target)
             if (isBouncingBack.current) {
                 dx = bounceVector.current.dx * bounceSpeed.current;
                 dy = bounceVector.current.dy * bounceSpeed.current;
@@ -74,19 +79,16 @@ const Player = ({ app, container, collisionRects, registerGoToHandler, addToInve
                 }
             }
 
-            // Approach target
             if (goTo.current && !isBouncingBack.current) {
                 const { x, y, target } = goTo.current;
                 const distX = x - player.x;
                 const distY = y - player.y;
                 const dist = Math.hypot(distX, distY);
 
-                // Move toward target
                 const angle = Math.atan2(distY, distX);
                 dx = Math.cos(angle) * SPEED * 2;
                 dy = Math.sin(angle) * SPEED * 2;
 
-                // Check if close enough to bounce
                 const globalPlayer = player.parent.toGlobal(player.position);
                 const playerBounds = new PIXI.Rectangle(globalPlayer.x - 12.5, globalPlayer.y - 12.5, 25, 25);
 

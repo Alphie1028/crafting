@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import GameBoard from './components/gameSpace/GameBoard'
 import Player from './components/player/Player'
 import Tree from './components/gameSpace/worldObjects/Tree'
@@ -8,6 +8,7 @@ import Inventory from './components/interface/Inventory'
 import CraftingSlots from './components/interface/CraftingSlots';
 import CraftingListModal from './components/interface/modals/CraftingListModal';
 import Caves from './components/gameSpace/worldObjects/Caves';
+import Slimes from './components/gameSpace/enemies/Slimes';
 
 const initialInventory = Array.from({ length: 20 }, () => ({ type: null, count: 0 }));
 const initialCraftingGrid = Array.from({ length: 4 }, () => ({ type: null, count: 0 }));
@@ -19,6 +20,7 @@ function App() {
   const [gameReady, setGameReady] = useState(false);
   const [craftingGrid, setCraftingGrid] = useState(initialCraftingGrid);
   const [inCave, setInCave] = useState(false);
+  const playerPositionRef = useRef({ x: 0, y: 0 });
 
   const handleItemDrop = (targetContainer, targetIndex) => {
     if (!draggedItem || !draggedFrom) return;
@@ -124,12 +126,13 @@ function App() {
   const gameElements = useMemo(() => [
     <Tree key="tree" />,
     <Stone key="stone" />,
-    <Player key="player" addToInventory={addToInventory} />,
+    <Player key="player" addToInventory={addToInventory} playerPositionRef={playerPositionRef} />,
     <Caves key="caves" inCave={inCave} setInCave={setInCave} />
   ], [addToInventory]);
 
   const caveElements = useMemo(() => [
-    <Player key="player-cave" addToInventory={addToInventory} />
+    <Player key="player-cave" addToInventory={addToInventory} playerPositionRef={playerPositionRef}/>,
+    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef}/>
   ], [addToInventory]);
 
 return (
