@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import * as PIXI from 'pixi.js';
 
-const Stone = ({ app, container, collisionRects, onGoToTarget }) => {
+const Stone = ({ app, container, collisionRects, onGoToTarget, boardSize }) => {
   useEffect(() => {
     if (!app || !container) return;
 
@@ -54,8 +54,8 @@ const Stone = ({ app, container, collisionRects, onGoToTarget }) => {
       const x = Math.random() * (app.screen.width - padding * 2) + padding;
       const y = Math.random() * (app.screen.height - padding * 2) + padding;
 
-      cluster.x = x;
-      cluster.y = y;
+      cluster.x = x - boardSize / 2;
+      cluster.y = y - boardSize / 2;
 
       if (Array.isArray(collisionRects)) {
         for (const rock of cluster.rocks) {

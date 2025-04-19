@@ -10,7 +10,7 @@ const SLIME_SPEED = 1.2;
 const MIN_DISTANCE = SLIME_RADIUS * 2.2;
 const PLAYER_RADIUS = 12.5;
 
-const Slimes = ({ app, container, playerPositionRef }) => {
+const Slimes = ({ app, container, playerPositionRef, boardSize }) => {
     useEffect(() => {
         if (!app || !container) return;
 
@@ -23,8 +23,8 @@ const Slimes = ({ app, container, playerPositionRef }) => {
             slime.drawCircle(0, 0, SLIME_RADIUS);
             slime.endFill();
 
-            slime.x = Math.random() * (app.screen.width  - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS;
-            slime.y = Math.random() * (app.screen.height - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS;
+            slime.x = Math.random() * (app.screen.width  - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS - boardSize / 2;
+            slime.y = Math.random() * (app.screen.height - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS - boardSize / 2;
 
             container.addChild(slime);
             slimes.push(slime);

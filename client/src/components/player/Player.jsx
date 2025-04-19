@@ -8,7 +8,7 @@ function willCollide(nextX, nextY, rects) {
     return rects.some(rect => rect.intersects(playerBounds));
 }
 
-const Player = ({ app, container, collisionRects, registerGoToHandler, addToInventory, playerPositionRef }) => {
+const Player = ({ app, container, collisionRects, registerGoToHandler, addToInventory, playerPositionRef, boardSize }) => {
     const playerRef = useRef(null);
     const goTo = useRef(null);
     const isBouncingBack = useRef(false);
@@ -34,10 +34,8 @@ const Player = ({ app, container, collisionRects, registerGoToHandler, addToInve
         player.endFill();
         player.pivot.set(12.5, 12.5);
 
-        const spawnX = app.screen.width / 2;
-        const spawnY = app.screen.height / 2;
-        player.x = spawnX;
-        player.y = spawnY;
+        player.x = 0
+        player.y = 0
         container.addChild(player);
         playerRef.current = player;
 
@@ -49,15 +47,13 @@ const Player = ({ app, container, collisionRects, registerGoToHandler, addToInve
 
         app.ticker.add((delta) => {
             if (!playerRef.current) return;
-
-            if (playerRef.current) {
-            playerPositionRef.current = {
-                x: playerRef.current.x,
-                y: playerRef.current.y,
-            };
-            }
-
             const player = playerRef.current;
+            
+            playerPositionRef.current = {
+                x: player.x,
+                y: player.y,
+            };
+            
             let dx = 0;
             let dy = 0;
 
@@ -188,8 +184,14 @@ const Player = ({ app, container, collisionRects, registerGoToHandler, addToInve
             }
         }
 
-        const nextX = Math.max(12.5, Math.min(app.screen.width - 12.5, player.x + dx));
-        const nextY = Math.max(12.5, Math.min(app.screen.height - 12.5, player.y + dy));
+            const half = boardSize / 2;
+            const minX = -half + 12.5;
+            const maxX =  half - 12.5;
+            const minY = -half + 12.5;
+            const maxY =  half - 12.5;
+
+            const nextX = Math.max(minX, Math.min(maxX, player.x + dx));
+            const nextY = Math.max(minY, Math.min(maxY, player.y + dy));
 
         if (!collisionRects || !willCollide(nextX, nextY, collisionRects)) {
             player.x = nextX;

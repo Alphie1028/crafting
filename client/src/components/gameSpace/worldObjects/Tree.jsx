@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import * as PIXI from 'pixi.js';
 
-const Tree = ({ app, container, collisionRects, onGoToTarget }) => {
+const Tree = ({ app, container, collisionRects, onGoToTarget, boardSize }) => {
     useEffect(() => {
     if (!app || !container) return;
 
@@ -43,8 +43,8 @@ const Tree = ({ app, container, collisionRects, onGoToTarget }) => {
             const x = Math.random() * (app.screen.width - padding * 2) + padding;
             const y = Math.random() * (app.screen.height - padding * 2) + padding;
 
-            tree.x = x;
-            tree.y = y;
+            tree.x = x - boardSize / 2;
+            tree.y = y - boardSize / 2;
 
             const hitbox = new PIXI.Rectangle(x - 4.5, y, 13, 40);
             if (Array.isArray(collisionRects)) {

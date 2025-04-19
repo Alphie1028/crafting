@@ -6,7 +6,7 @@ const CAVE_SIZE = PLAYER_SIZE * 1.5;
 const MIN_CAVES = 2;
 const MAX_CAVES = 5;
 
-const Caves = ({ app, container, inCave, setInCave }) => {
+const Caves = ({ app, container, inCave, setInCave, boardSize }) => {
   useEffect(() => {
     if (!app || !container) return;
 
@@ -18,8 +18,8 @@ const Caves = ({ app, container, inCave, setInCave }) => {
     for (let i = 0; i < count; i++) {
       const g = new PIXI.Graphics();
       g.beginFill(0x000000).drawRect(0, 0, CAVE_SIZE, CAVE_SIZE).endFill();
-      g.x = Math.random() * (app.screen.width  - padding*2 - CAVE_SIZE) + padding;
-      g.y = Math.random() * (app.screen.height - padding*2 - CAVE_SIZE) + padding;
+      g.x = Math.random() * (app.screen.width - padding * 2 - CAVE_SIZE) + padding - boardSize / 2;
+      g.y = Math.random() * (app.screen.height - padding * 2 - CAVE_SIZE) + padding - boardSize / 2;
       container.addChild(g);
       caves.push(g);
       caveRects.push(new PIXI.Rectangle(g.x, g.y, CAVE_SIZE, CAVE_SIZE));

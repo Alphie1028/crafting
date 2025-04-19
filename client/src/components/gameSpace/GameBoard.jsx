@@ -5,6 +5,7 @@ const GameBoard = ({ children }) => {
   const containerRef = useRef(null);
   const [app, setApp] = useState(null);
   const [gameContainer, setGameContainer] = useState(null);
+  const [boardSize, setBoardSize] = useState(null);
   const [collisionRects] = useState([]);
   const goToTargetRef = useRef(null);
 
@@ -15,6 +16,7 @@ const GameBoard = ({ children }) => {
   useEffect(() => {
     (async () => {
       const size = Math.min(window.innerWidth, window.innerHeight) * 0.75;
+      setBoardSize(size);
       const canvas = document.createElement('canvas');
 
       const appInstance = new PIXI.Application();
@@ -44,6 +46,7 @@ const GameBoard = ({ children }) => {
       appInstance.stage.addChild(border);
 
       const gameContainerInstance = new PIXI.Container();
+      gameContainerInstance.position.set(size / 2, size / 2);
       appInstance.stage.addChild(gameContainerInstance);
 
       const maskShape = new PIXI.Graphics();
@@ -53,6 +56,7 @@ const GameBoard = ({ children }) => {
       appInstance.stage.addChild(maskShape);
       gameContainerInstance.mask = maskShape;
 
+      const half = size / 2;
       setApp(appInstance);
       setGameContainer(gameContainerInstance);
 
@@ -63,18 +67,20 @@ const GameBoard = ({ children }) => {
   }, []);
 
   const enhancedChildren = useMemo(() => {
-    if (!app || !gameContainer) return null;
+    if (!app || !gameContainer || boardSize == null) return null;
     return React.Children.map(children, (child) =>
-    React.isValidElement(child)
-    ? React.cloneElement(child, {
-      app,
-      container: gameContainer,
-      collisionRects,
-      onGoToTarget: handleGoToTarget,
-      registerGoToHandler: (cb) => (goToTargetRef.current = cb),
-    }): child
+      React.isValidElement(child)
+        ? React.cloneElement(child, {
+            app,
+            container: gameContainer,
+            collisionRects,
+            onGoToTarget: handleGoToTarget,
+            boardSize,
+            registerGoToHandler: (cb) => (goToTargetRef.current = cb),
+          })
+        : child
     );
-  }, [children, app, gameContainer]);
+  }, [children, app, gameContainer, boardSize]);
 
   return (
     <div

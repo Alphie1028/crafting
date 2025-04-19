@@ -12,6 +12,7 @@ import Slimes from './components/gameSpace/enemies/Slimes';
 import craftables from './data/craftables';
 import Stats from './components/interface/Stats';
 import Equipment from './components/interface/Equipment';
+import InUse from './components/itemsBeingUsed/InUse';
 
 const initialInventory = Array.from({ length: 20 }, () => ({ type: null, count: 0 }));
 const initialCraftingGrid = Array.from({ length: 4 }, () => ({ type: null, count: 0 }));
@@ -202,8 +203,9 @@ function App() {
 
   const caveElements = useMemo(() => [
     <Player key="player-cave" addToInventory={addToInventory} playerPositionRef={playerPositionRef}/>,
-    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef}/>
-  ], [addToInventory]);
+    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef}/>,
+    <InUse key="in-use" equipment={equipment} playerPositionRef={playerPositionRef} inCave={inCave}/>,
+  ],[addToInventory, equipment, playerPositionRef, inCave]);
 
 return (
   <div className="app-layout">
