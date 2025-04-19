@@ -80,16 +80,10 @@ const GameBoard = ({ children }) => {
     <div
       ref={containerRef}
       style={{
-        width: '75vw',
-        height: '75vw',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         margin: '0 auto',
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
       }}
     >
       {enhancedChildren}

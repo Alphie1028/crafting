@@ -2,7 +2,7 @@
     position: absolute;
     bottom: 2vh;
     left: 50%;
-    transform: translateX(-50%);
+    margin-left: -10vw;
     width: 20vw;
     height: fit-content;
     display: flex;

@@ -1,0 +1,19 @@
+.stats-container {
+    width: 5vw;
+    background-color: #eee;
+    padding: 1vh;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-container h2 {
+    margin: 0 0 0.5em;
+}
+
+.stats-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}

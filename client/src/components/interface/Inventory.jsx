@@ -101,10 +101,9 @@ const Inventory = ({ inventory, setInventory, draggedItem, setDraggedItem, dragg
                 padding: '4px 8px',
                 border: '1px solid #333',
                 borderRadius: '4px',
-                zIndex: 1000,
-                width: '60px',
+                transform: 'translate(-50%, -50%)',
                 textAlign: 'center',
-                transform: 'translate(-40.8vw, -90vh)'
+                
             }}
             >
             <div>{draggedItem.type}</div>

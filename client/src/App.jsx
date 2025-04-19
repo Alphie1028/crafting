@@ -9,9 +9,13 @@ import CraftingSlots from './components/interface/CraftingSlots';
 import CraftingListModal from './components/interface/modals/CraftingListModal';
 import Caves from './components/gameSpace/worldObjects/Caves';
 import Slimes from './components/gameSpace/enemies/Slimes';
+import craftables from './data/craftables';
+import Stats from './components/interface/Stats';
+import Equipment from './components/interface/Equipment';
 
 const initialInventory = Array.from({ length: 20 }, () => ({ type: null, count: 0 }));
 const initialCraftingGrid = Array.from({ length: 4 }, () => ({ type: null, count: 0 }));
+const initialBaseStats = { hp: 100, attack: 1, armor: 0 };
 
 function App() {
   const [inventory, setInventory] = useState(initialInventory);
@@ -21,25 +25,34 @@ function App() {
   const [craftingGrid, setCraftingGrid] = useState(initialCraftingGrid);
   const [inCave, setInCave] = useState(false);
   const playerPositionRef = useRef({ x: 0, y: 0 });
+  const [equipment, setEquipment] = useState([]);
 
   const handleItemDrop = (targetContainer, targetIndex) => {
     if (!draggedItem || !draggedFrom) return;
 
     if (targetContainer === 'inventory') {
+      if (draggedFrom.container === 'equipment') {
+        setEquipment(prev => {
+          const copy = [...prev];
+          copy.splice(draggedFrom.index, 1);
+          return copy;
+        });
+      }
+
       setInventory(prev => {
         const copy = [...prev];
-        if (targetIndex === draggedFrom.index) return copy;
-        const targetSlot = copy[targetIndex];
-
-        if (!targetSlot.type) {
-          copy[targetIndex] = { ...draggedItem };
-        } else if (
-          targetSlot.type === draggedItem.type &&
-          targetSlot.count < 50
-        ) {
-          const space = 50 - targetSlot.count;
-          const transfer = Math.min(space, draggedItem.count);
-          targetSlot.count += transfer;
+        if (!(draggedFrom.container === 'inventory' && targetIndex === draggedFrom.index)) {
+          const targetSlot = copy[targetIndex];
+          if (!targetSlot.type) {
+            copy[targetIndex] = { ...draggedItem };
+          } else if (
+            targetSlot.type === draggedItem.type &&
+            targetSlot.count < 50
+          ) {
+            const space = 50 - targetSlot.count;
+            const transfer = Math.min(space, draggedItem.count);
+            targetSlot.count += transfer;
+          }
         }
         return copy;
       });
@@ -57,20 +70,20 @@ function App() {
           return copy;
         });
       }
+
     } else if (targetContainer === 'crafting') {
       setCraftingGrid(prev => {
         const copy = [...prev];
-        const targetSlot = copy[targetIndex];
-
-        if (!targetSlot.type) {
+        const slot = copy[targetIndex];
+        if (!slot.type) {
           copy[targetIndex] = { ...draggedItem };
         } else if (
-          targetSlot.type === draggedItem.type &&
-          targetSlot.count < 50
+          slot.type === draggedItem.type &&
+          slot.count < 50
         ) {
-          const space = 50 - targetSlot.count;
-          const transfer = Math.min(space, draggedItem.count);
-          targetSlot.count += transfer;
+          const space = 50 - slot.count;
+          const move  = Math.min(space, draggedItem.count);
+          slot.count += move;
         }
         return copy;
       });
@@ -87,6 +100,50 @@ function App() {
           copy[draggedFrom.index] = { type: null, count: 0 };
           return copy;
         });
+      } else if (draggedFrom.container === 'equipment') {
+        setEquipment(prev => {
+          const copy = [...prev];
+          copy.splice(draggedFrom.index, 1);
+          return copy;
+        });
+      }
+
+    } else if (targetContainer === 'equipment-slot') {
+      setEquipment(prev => {
+        const copy = [...prev];
+        copy[targetIndex] = { ...draggedItem };
+        return copy;
+      });
+      if (draggedFrom.container === 'inventory') {
+        setInventory(prev => {
+          const copy = [...prev];
+          copy[draggedFrom.index] = { type: null, count: 0 };
+          return copy;
+        });
+      } else if (draggedFrom.container === 'crafting') {
+        setCraftingGrid(prev => {
+          const copy = [...prev];
+          copy[draggedFrom.index] = { type: null, count: 0 };
+          return copy;
+        });
+      }
+
+    } else if (targetContainer === 'equipment') {
+      if (['inventory', 'crafting'].includes(draggedFrom.container)) {
+        setEquipment(prev => [...prev, { ...draggedItem }]);
+        if (draggedFrom.container === 'inventory') {
+          setInventory(prev => {
+            const copy = [...prev];
+            copy[draggedFrom.index] = { type: null, count: 0 };
+            return copy;
+          });
+        } else {
+          setCraftingGrid(prev => {
+            const copy = [...prev];
+            copy[draggedFrom.index] = { type: null, count: 0 };
+            return copy;
+          });
+        }
       }
     }
 
@@ -123,6 +180,19 @@ function App() {
     });
   }, []);
 
+  const stats = useMemo(() => {
+   const s = { ...initialBaseStats };
+    equipment.forEach((item) => {
+      const recipe = craftables.find(c => c.gives.type === item.type);
+      if (recipe?.extra) {
+        if (recipe.extra.damage)   s.attack += recipe.extra.damage;
+        if (recipe.extra.armor)    s.armor  += recipe.extra.armor;
+        if (recipe.extra.hp)       s.hp     += recipe.extra.hp;
+      }
+    });
+    return s;
+  }, [equipment]);
+
   const gameElements = useMemo(() => [
     <Tree key="tree" />,
     <Stone key="stone" />,
@@ -137,8 +207,13 @@ function App() {
 
 return (
   <div className="app-layout">
+    <div
+      className="board-and-sidebars"
+       style={{ display:'flex', alignItems:'flex-start', justifyContent:'center', width:'100%' }}
+     >
+       <Stats stats={stats} />
     <div className="board-wrapper">
-      <div style={{ display: inCave ? 'none' : 'block' }}>
+      <div style={{ display: inCave ? 'none' : 'block'}}>
       <GameBoard>{gameElements}</GameBoard>
       </div>
 
@@ -146,7 +221,15 @@ return (
         <GameBoard key="cave">{caveElements}</GameBoard>
       </div>
     </div>
-
+      <Equipment
+        equipment={equipment}
+        draggedItem={draggedItem}
+         setDraggedItem={setDraggedItem}
+        draggedFrom={draggedFrom}
+         setDraggedFrom={setDraggedFrom}
+         onDrop={handleItemDrop}
+       />
+     </div>
   <div className="interface-stack">
     <CraftingSlots
       craftingGrid={craftingGrid}
