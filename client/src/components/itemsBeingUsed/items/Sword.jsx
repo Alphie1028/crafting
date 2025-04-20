@@ -17,22 +17,26 @@ const Sword = ({ app, container, playerPositionRef, variant = 'stone' }) => {
     if (!app || !container) return;
 
     const variantProps = VARIANTS[variant] || VARIANTS.stone;
-    console.log('🔪 Sword mounted with props:', variantProps);
+    console.log('Sword mounted with props:', variantProps);
 
     const blade = new PIXI.Graphics();
     blade.beginFill(variantProps.color);
-    blade.drawRect(-variantProps.width / 2, 0, variantProps.width, variantProps.height);
+    blade.drawRect(-variantProps.width / 2, -variantProps.height, variantProps.width, variantProps.height);
     blade.endFill();
 
     blade.pivot.set(0, 0);
-
     container.addChild(blade);
     bladeRef.current = blade;
+
+    let angle = 0;
 
     const ticker = () => {
       const { x, y } = playerPositionRef.current;
       blade.x = x;
       blade.y = y;
+      blade.rotation = angle;
+
+      angle += 0.1;
     };
 
     app.ticker.add(ticker);
