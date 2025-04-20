@@ -10,7 +10,7 @@ const SLIME_SPEED = 1.2;
 const MIN_DISTANCE = SLIME_RADIUS * 2.2;
 const PLAYER_RADIUS = 12.5;
 
-const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCave, setTimer, setPortalVisible, takeDamage }) => {
+const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCave, setTimer, setPortalVisible, takeDamage, setChestReady }) => {
     useEffect(() => {
     if (!app || !container || !inCave) return;
 
@@ -42,7 +42,7 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCav
         spawnSlimes(count);
     }, 2000);
 
-    let countdown = 60;
+    let countdown = 1;
     setTimer(countdown);
     
     const timerInterval = setInterval(() => {
@@ -50,8 +50,10 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCav
     setTimer(countdown);
 
     if (countdown <= 0) {
+        clearInterval(interval);
         clearInterval(timerInterval);
-        setPortalVisible(true); // <--- Trigger portal appearance
+        setPortalVisible(true);
+        setChestReady(true);
     }
     }, 1000);
 

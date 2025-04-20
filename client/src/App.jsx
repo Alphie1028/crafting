@@ -14,6 +14,7 @@ import Stats from './components/interface/Stats';
 import Equipment from './components/interface/Equipment';
 import InUse from './components/itemsBeingUsed/InUse';
 import Portal from './components/gameSpace/worldObjects/Portal';
+import Chest from './components/gameSpace/worldObjects/Chest';
 
 const initialInventory = Array.from({ length: 20 }, () => ({ type: null, count: 0 }));
 const initialCraftingGrid = Array.from({ length: 4 }, () => ({ type: null, count: 0 }));
@@ -36,7 +37,8 @@ function App() {
   const playerHpRef = useRef(initialBaseStats.hp);
   const [liveHp, setLiveHp] = useState(initialBaseStats.hp);
   const [isDead, setIsDead] = useState(false);
-
+  const [chestLoot, setChestLoot] = useState(null);
+  const [chestReady, setChestReady] = useState(false);
 
   const handleTakeDamage = useCallback((amount) => {
     playerHpRef.current = Math.max(0, playerHpRef.current - amount);
@@ -53,6 +55,7 @@ function App() {
       originalPlayerPositionRef.current = { ...playerPositionRef.current };
     } else {
       playerPositionRef.current = { ...originalPlayerPositionRef.current };
+      setChestReady(false);
     }
   }, [inCave]);
 
@@ -225,22 +228,66 @@ function App() {
   const gameElements = useMemo(() => [
     <Tree key="tree" />,
     <Stone key="stone" />,
-    !isDead && <Player key="player" addToInventory={addToInventory} playerPositionRef={playerPositionRef} />,
-    <Caves key="caves" inCave={inCave} setInCave={setInCave} />
-  ], [addToInventory]);
+      !isDead && <Player 
+      key="player" 
+      addToInventory={addToInventory} 
+      playerPositionRef={playerPositionRef} 
+    />,
+    <Caves 
+      key="caves" 
+      inCave={inCave} 
+      setInCave={setInCave} 
+    />
+  ], [addToInventory, isDead]);
 
   const caveElements = useMemo(() => [
-    !isDead && <Player key="player-cave" addToInventory={addToInventory} playerPositionRef={playerPositionRef} />,
-    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef} slimesRef={slimesRef} inCave={inCave} setTimer={setTimer} setPortalVisible={setPortalVisible} takeDamage={handleTakeDamage}/>,
-    <InUse key="in-use" equipment={equipment} playerPositionRef={playerPositionRef} inCave={inCave} slimesRef={slimesRef}/>,
-      portalVisible && <Portal
-    key="portal"
-    playerPositionRef={playerPositionRef}
-    setInCave={setInCave}
-    setPortalVisible={setPortalVisible}
-    boardSize={boardSize}
-  />,
-  ],[addToInventory, equipment, playerPositionRef, inCave, boardSize, portalVisible]);
+    !isDead && <Player
+      key="player-cave" 
+      addToInventory={addToInventory} 
+      playerPositionRef={playerPositionRef} 
+    />,
+    <Slimes 
+      key="slimes-cave" 
+      playerPositionRef={playerPositionRef} 
+      slimesRef={slimesRef} inCave={inCave} 
+      setTimer={setTimer} 
+      setPortalVisible={setPortalVisible} 
+      takeDamage={handleTakeDamage} 
+      setChestReady={setChestReady}
+    />,
+    <InUse
+      key="in-use" 
+      equipment={equipment} 
+      playerPositionRef={playerPositionRef} 
+      inCave={inCave} 
+      slimesRef={slimesRef}
+    />,
+    portalVisible && <Portal
+      key="portal"
+      playerPositionRef={playerPositionRef}
+      setInCave={setInCave}
+      setPortalVisible={setPortalVisible}
+      boardSize={boardSize}
+    />,
+    chestReady && !chestLoot && (
+      <Chest
+        key="chest"
+        playerPositionRef={playerPositionRef}
+        addToInventory={addToInventory}
+        boardSize={boardSize}
+        setChestLoot={setChestLoot}
+      />
+    )
+  ],[
+      addToInventory, 
+      equipment, 
+      playerPositionRef, 
+      inCave, 
+      boardSize, 
+      portalVisible, 
+      isDead
+    ]
+  );
 
 return (
   <div className="app-layout">
@@ -321,6 +368,39 @@ return (
         onClick={() => window.location.reload()}
       >
         Restart
+      </button>
+    </div>
+  )}
+    {chestLoot && (
+    <div style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      color: '#fff',
+      textAlign: 'center',
+      padding: '30px',
+      borderRadius: '12px',
+      zIndex: 9999,
+    }}>
+      <h2 style={{ fontSize: '32px', marginBottom: '16px' }}>You Found: {chestLoot.name}</h2>
+      <button
+        style={{
+          padding: '10px 20px',
+          fontSize: '18px',
+          backgroundColor: '#666',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+        }}
+        onClick={() => {
+          addToInventory(chestLoot.id, 1);
+          setChestLoot(null);
+        }}
+      >
+        Pick Up
       </button>
     </div>
   )}
