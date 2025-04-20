@@ -5,8 +5,8 @@ const VARIANTS = {
   stone: {
     color: 0x808080,
     damage: 5,
-    width: 5,
-    height: 30,
+    width: 10,
+    height: 100,
   },
 };
 
@@ -36,17 +36,23 @@ const Sword = ({ app, container, playerPositionRef, variant = 'stone', slimesRef
       blade.y = y;
       blade.rotation = angle;
 
-      const tipX = x + Math.cos(angle) * variantProps.height;
-      const tipY = y + Math.sin(angle) * variantProps.height;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
 
       if (slimesRef?.current) {
         for (let i = slimesRef.current.length - 1; i >= 0; i--) {
           const slime = slimesRef.current[i];
-          const dx = tipX - slime.x;
-          const dy = tipY - slime.y;
-          const distance = Math.hypot(dx, dy);
 
-          if (distance < 15 + variantProps.width / 2) {
+          const dx = slime.x - x;
+          const dy = slime.y - y;
+
+          const localX = cos * dx + sin * dy;
+          const localY = -sin * dx + cos * dy;
+
+          const withinX = localX >= -variantProps.width / 2 && localX <= variantProps.width / 2;
+          const withinY = localY >= -variantProps.height && localY <= 0;
+
+          if (withinX && withinY) {
             console.log(`Hit slime ${i}!`);
             container.removeChild(slime);
             slimesRef.current.splice(i, 1);
@@ -56,6 +62,7 @@ const Sword = ({ app, container, playerPositionRef, variant = 'stone', slimesRef
 
       angle += 0.1;
     };
+
 
     app.ticker.add(ticker);
 
