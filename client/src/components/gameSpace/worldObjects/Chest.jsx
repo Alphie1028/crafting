@@ -22,11 +22,16 @@ const Chest = ({ app, container, playerPositionRef, boardSize, addToInventory, s
     }
 
     const roll = Math.random();
-    let pool;
-    if (roll < 0.10) pool = lootables.filter(l => l.rarity === 'mythic');
-    else if (roll < 0.25) pool = lootables.filter(l => l.rarity === 'rare');
-    else if (roll < 0.60) pool = lootables.filter(l => l.rarity === 'uncommon');
-    else pool = lootables.filter(l => l.rarity === 'common');
+    let pool = 
+      roll < 0.10 ? lootables.filter(l => l.rarity === 'mythic') :
+      roll < 0.25 ? lootables.filter(l => l.rarity === 'rare') : 
+      roll < 0.60  ? lootables.filter(l => l.rarity === 'uncommon') :
+        lootables.filter(l => l.rarity === 'common');
+
+    if (pool.length === 0) {
+      console.warn('Filtered pool empty, falling back to all lootables');
+      pool = lootables;
+    }
 
     const item = pool[Math.floor(Math.random() * pool.length)];
     console.log("Chest contains:", item);
