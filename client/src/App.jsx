@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import GameBoard from './components/gameSpace/GameBoard'
 import Player from './components/player/Player'
 import Tree from './components/gameSpace/worldObjects/Tree'
@@ -13,6 +13,7 @@ import craftables from './data/craftables';
 import Stats from './components/interface/Stats';
 import Equipment from './components/interface/Equipment';
 import InUse from './components/itemsBeingUsed/InUse';
+import Portal from './components/gameSpace/worldObjects/Portal';
 
 const initialInventory = Array.from({ length: 20 }, () => ({ type: null, count: 0 }));
 const initialCraftingGrid = Array.from({ length: 4 }, () => ({ type: null, count: 0 }));
@@ -29,6 +30,17 @@ function App() {
   const [equipment, setEquipment] = useState([]);
   const slimesRef = useRef([]);
   const [timer, setTimer] = useState(null);
+  const [portalVisible, setPortalVisible] = useState(false);
+  const originalPlayerPositionRef = useRef({ x: 0, y: 0 });
+  const [boardSize, setBoardSize] = useState(null);
+
+  useEffect(() => {
+    if (inCave) {
+      originalPlayerPositionRef.current = { ...playerPositionRef.current };
+    } else {
+      playerPositionRef.current = { ...originalPlayerPositionRef.current };
+    }
+  }, [inCave]);
 
   const handleItemDrop = (targetContainer, targetIndex) => {
     if (!draggedItem || !draggedFrom) return;
@@ -205,9 +217,16 @@ function App() {
 
   const caveElements = useMemo(() => [
     <Player key="player-cave" addToInventory={addToInventory} playerPositionRef={playerPositionRef}/>,
-    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef} slimesRef={slimesRef} inCave={inCave} setTimer={setTimer}/>,
+    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef} slimesRef={slimesRef} inCave={inCave} setTimer={setTimer} setPortalVisible={setPortalVisible}/>,
     <InUse key="in-use" equipment={equipment} playerPositionRef={playerPositionRef} inCave={inCave} slimesRef={slimesRef}/>,
-  ],[addToInventory, equipment, playerPositionRef, inCave]);
+      portalVisible && <Portal
+    key="portal"
+    playerPositionRef={playerPositionRef}
+    setInCave={setInCave}
+    setPortalVisible={setPortalVisible}
+    boardSize={boardSize}
+  />,
+  ],[addToInventory, equipment, playerPositionRef, inCave, boardSize, portalVisible]);
 
 return (
   <div className="app-layout">
@@ -218,11 +237,11 @@ return (
        <Stats stats={stats} />
     <div className="board-wrapper">
       <div style={{ display: inCave ? 'none' : 'block'}}>
-      <GameBoard timer={timer}>{gameElements}</GameBoard>
+      <GameBoard timer={timer} onBoardSize={setBoardSize}>{gameElements}</GameBoard>
       </div>
 
       <div style={{ display: inCave ? 'block' : 'none' }}>
-        <GameBoard key="cave" timer={timer}>{caveElements}</GameBoard>
+        <GameBoard key="cave" timer={timer} onBoardSize={setBoardSize}>{caveElements}</GameBoard>
       </div>
     </div>
       <Equipment

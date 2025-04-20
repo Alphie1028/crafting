@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import * as PIXI from 'pixi.js';
 
-const GameBoard = ({ children, timer }) => {
+const GameBoard = ({ children, timer, onBoardSize }) => {
   const containerRef = useRef(null);
   const [app, setApp] = useState(null);
   const [gameContainer, setGameContainer] = useState(null);
@@ -17,6 +17,7 @@ const GameBoard = ({ children, timer }) => {
     (async () => {
       const size = Math.min(window.innerWidth, window.innerHeight) * 0.75;
       setBoardSize(size);
+      onBoardSize?.(size);
       const canvas = document.createElement('canvas');
 
       const appInstance = new PIXI.Application();
@@ -64,7 +65,7 @@ const GameBoard = ({ children, timer }) => {
         appInstance.destroy(true, { children: true });
       };
     })();
-  }, []);
+  }, [onBoardSize]);
 
   const enhancedChildren = useMemo(() => {
     if (!app || !gameContainer || boardSize == null) return null;
