@@ -43,7 +43,7 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCav
         spawnSlimes(count);
     }, 2000);
 
-    let countdown = 1;
+    let countdown = 60;
     setTimer(countdown);
     
     const timerInterval = setInterval(() => {
