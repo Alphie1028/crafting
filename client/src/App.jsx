@@ -33,6 +33,20 @@ function App() {
   const [portalVisible, setPortalVisible] = useState(false);
   const originalPlayerPositionRef = useRef({ x: 0, y: 0 });
   const [boardSize, setBoardSize] = useState(null);
+  const playerHpRef = useRef(initialBaseStats.hp);
+  const [liveHp, setLiveHp] = useState(initialBaseStats.hp);
+  const [isDead, setIsDead] = useState(false);
+
+
+  const handleTakeDamage = useCallback((amount) => {
+    playerHpRef.current = Math.max(0, playerHpRef.current - amount);
+    setLiveHp(prev => {
+      const nextHp = Math.max(0, prev - amount);
+      if (nextHp === 0) setIsDead(true);
+      return nextHp;
+    });
+  }, []);
+
 
   useEffect(() => {
     if (inCave) {
@@ -211,13 +225,13 @@ function App() {
   const gameElements = useMemo(() => [
     <Tree key="tree" />,
     <Stone key="stone" />,
-    <Player key="player" addToInventory={addToInventory} playerPositionRef={playerPositionRef} />,
+    !isDead && <Player key="player" addToInventory={addToInventory} playerPositionRef={playerPositionRef} />,
     <Caves key="caves" inCave={inCave} setInCave={setInCave} />
   ], [addToInventory]);
 
   const caveElements = useMemo(() => [
-    <Player key="player-cave" addToInventory={addToInventory} playerPositionRef={playerPositionRef}/>,
-    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef} slimesRef={slimesRef} inCave={inCave} setTimer={setTimer} setPortalVisible={setPortalVisible}/>,
+    !isDead && <Player key="player-cave" addToInventory={addToInventory} playerPositionRef={playerPositionRef} />,
+    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef} slimesRef={slimesRef} inCave={inCave} setTimer={setTimer} setPortalVisible={setPortalVisible} takeDamage={handleTakeDamage}/>,
     <InUse key="in-use" equipment={equipment} playerPositionRef={playerPositionRef} inCave={inCave} slimesRef={slimesRef}/>,
       portalVisible && <Portal
     key="portal"
@@ -234,7 +248,7 @@ return (
       className="board-and-sidebars"
        style={{ display:'flex', alignItems:'flex-start', justifyContent:'center', width:'100%' }}
      >
-       <Stats stats={stats} />
+       <Stats stats={{ ...stats, hp: liveHp }} />
     <div className="board-wrapper">
       <div style={{ display: inCave ? 'none' : 'block'}}>
       <GameBoard timer={timer} onBoardSize={setBoardSize}>{gameElements}</GameBoard>
@@ -280,7 +294,36 @@ return (
     />
 
   </div>
-
+  {isDead && (
+    <div style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      textAlign: 'center',
+      padding: '40px',
+      borderRadius: '12px',
+      zIndex: 9999,
+    }}>
+      <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>Wasted</h1>
+      <button
+        style={{
+          padding: '12px 24px',
+          fontSize: '20px',
+          backgroundColor: '#ff5555',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+        }}
+        onClick={() => window.location.reload()}
+      >
+        Restart
+      </button>
+    </div>
+  )}
   </div>
 );
 }

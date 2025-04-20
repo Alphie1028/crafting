@@ -10,9 +10,12 @@ const SLIME_SPEED = 1.2;
 const MIN_DISTANCE = SLIME_RADIUS * 2.2;
 const PLAYER_RADIUS = 12.5;
 
-const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCave, setTimer, setPortalVisible }) => {
+const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCave, setTimer, setPortalVisible, takeDamage }) => {
     useEffect(() => {
     if (!app || !container || !inCave) return;
+
+    const damageCooldowns = new Map();
+    const DAMAGE_COOLDOWN_MS = 1000;
 
     const slimes = [];
     if (slimesRef) slimesRef.current = slimes;
@@ -67,8 +70,18 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCav
             slime.y += Math.sin(angle) * SLIME_SPEED;
         } else {
             const repelAngle = Math.atan2(dy, dx);
+            const now = performance.now();
+            const lastHit = damageCooldowns.get(slime) ?? 0;
+            const touching = distToPlayer <= SLIME_RADIUS + PLAYER_RADIUS + 2;
+
+            if (touching) {
+            if (now - lastHit >= DAMAGE_COOLDOWN_MS) {
+                takeDamage?.(5);
+                damageCooldowns.set(slime, now);
+            }
             slime.x -= Math.cos(repelAngle) * (SLIME_SPEED * 0.5);
             slime.y -= Math.sin(repelAngle) * (SLIME_SPEED * 0.5);
+            }
         }
         }
 
