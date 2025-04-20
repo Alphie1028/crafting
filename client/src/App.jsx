@@ -28,6 +28,7 @@ function App() {
   const playerPositionRef = useRef({ x: 0, y: 0 });
   const [equipment, setEquipment] = useState([]);
   const slimesRef = useRef([]);
+  const [timer, setTimer] = useState(null);
 
   const handleItemDrop = (targetContainer, targetIndex) => {
     if (!draggedItem || !draggedFrom) return;
@@ -204,7 +205,7 @@ function App() {
 
   const caveElements = useMemo(() => [
     <Player key="player-cave" addToInventory={addToInventory} playerPositionRef={playerPositionRef}/>,
-    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef} slimesRef={slimesRef}/>,
+    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef} slimesRef={slimesRef} inCave={inCave} setTimer={setTimer}/>,
     <InUse key="in-use" equipment={equipment} playerPositionRef={playerPositionRef} inCave={inCave} slimesRef={slimesRef}/>,
   ],[addToInventory, equipment, playerPositionRef, inCave]);
 
@@ -217,11 +218,11 @@ return (
        <Stats stats={stats} />
     <div className="board-wrapper">
       <div style={{ display: inCave ? 'none' : 'block'}}>
-      <GameBoard>{gameElements}</GameBoard>
+      <GameBoard timer={timer}>{gameElements}</GameBoard>
       </div>
 
       <div style={{ display: inCave ? 'block' : 'none' }}>
-        <GameBoard key="cave">{caveElements}</GameBoard>
+        <GameBoard key="cave" timer={timer}>{caveElements}</GameBoard>
       </div>
     </div>
       <Equipment

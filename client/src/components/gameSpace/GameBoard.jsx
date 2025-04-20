@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import * as PIXI from 'pixi.js';
 
-const GameBoard = ({ children }) => {
+const GameBoard = ({ children, timer }) => {
   const containerRef = useRef(null);
   const [app, setApp] = useState(null);
   const [gameContainer, setGameContainer] = useState(null);
@@ -83,16 +83,25 @@ const GameBoard = ({ children }) => {
   }, [children, app, gameContainer, boardSize]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        margin: '0 auto',
-      }}
-    >
-      {enhancedChildren}
+    <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
+      <div ref={containerRef}>{enhancedChildren}</div>
+      {timer !== null && (
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.6)',
+          color: '#fff',
+          padding: '6px 12px',
+          borderRadius: '8px',
+          fontSize: '16px',
+          zIndex: 10,
+          pointerEvents: 'none'
+        }}>
+          Time left: {timer}s
+        </div>
+      )}
     </div>
   );
 };

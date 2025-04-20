@@ -10,9 +10,9 @@ const SLIME_SPEED = 1.2;
 const MIN_DISTANCE = SLIME_RADIUS * 2.2;
 const PLAYER_RADIUS = 12.5;
 
-const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef }) => {
+const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCave, setTimer }) => {
     useEffect(() => {
-    if (!app || !container) return;
+    if (!app || !container || !inCave) return;
 
     const slimes = [];
     if (slimesRef) slimesRef.current = slimes;
@@ -39,9 +39,14 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef }) => 
         spawnSlimes(count);
     }, 2000);
 
-    const timeout = setTimeout(() => {
-        clearInterval(interval);
-    }, 60000);
+    let countdown = 60;
+    setTimer(countdown);
+    
+    const timerInterval = setInterval(() => {
+      countdown--;
+      setTimer(countdown);
+      if (countdown <= 0) clearInterval(timerInterval);
+    }, 1000);
 
     const tickerCb = () => {
         const playerPos = playerPositionRef?.current;
@@ -90,11 +95,11 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef }) => 
 
     return () => {
         clearInterval(interval);
-        clearTimeout(timeout);
+        clearInterval(timerInterval);
         slimes.forEach(s => container.removeChild(s));
         app.ticker.remove(tickerCb);
     };
-    }, [app, container, playerPositionRef, boardSize, slimesRef]);
+    }, [app, container, playerPositionRef, boardSize, slimesRef, inCave, setTimer]);
 
 
     return null;
