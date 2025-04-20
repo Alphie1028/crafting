@@ -45,12 +45,12 @@ const Tree = ({ app, container, collisionRects, onGoToTarget, boardSize }) => {
 
             tree.x = x - boardSize / 2;
             tree.y = y - boardSize / 2;
-
+            /*
             const hitbox = new PIXI.Rectangle(x - 4.5, y, 13, 40);
             if (Array.isArray(collisionRects)) {
                 collisionRects.push(hitbox);
             }
-
+            */
             container.addChild(tree);
             trees.push(tree);
             trunk.interactive = true;

@@ -59,13 +59,14 @@ const Stone = ({ app, container, collisionRects, onGoToTarget, boardSize }) => {
 
       if (Array.isArray(collisionRects)) {
         for (const rock of cluster.rocks) {
+          /*
           const rect = new PIXI.Rectangle(
             x + rock.x,
             y + rock.y,
             rockSize,
             rockSize
           );
-          collisionRects.push(rect);
+          collisionRects.push(rect);*/
         }
       }
 
