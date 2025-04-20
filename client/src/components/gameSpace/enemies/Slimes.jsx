@@ -29,7 +29,8 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCav
 
         slime.x = Math.random() * (app.screen.width - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS - boardSize / 2;
         slime.y = Math.random() * (app.screen.height - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS - boardSize / 2;
-
+        slime.hp = 5;
+        slime.frozenUntil = null;
         container.addChild(slime);
         slimes.push(slime);
         }
@@ -60,8 +61,9 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCav
     const tickerCb = () => {
         const playerPos = playerPositionRef?.current;
         if (!playerPos) return;
-
+        const now = performance.now();
         for (const slime of slimes) {
+        if (slime.frozenUntil && now < slime.frozenUntil) continue;
         const dx = playerPos.x - slime.x;
         const dy = playerPos.y - slime.y;
         const distToPlayer = Math.hypot(dx, dy);
@@ -91,6 +93,7 @@ const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef, inCav
         for (let j = i + 1; j < slimes.length; j++) {
             const a = slimes[i];
             const b = slimes[j];
+            if ((a.frozenUntil && performance.now() < a.frozenUntil) || (b.frozenUntil && performance.now() < b.frozenUntil)) continue;
             const dx = b.x - a.x;
             const dy = b.y - a.y;
             const dist = Math.hypot(dx, dy);

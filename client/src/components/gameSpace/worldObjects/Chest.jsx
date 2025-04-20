@@ -16,25 +16,22 @@ const Chest = ({ app, container, playerPositionRef, boardSize, addToInventory, s
     container.addChild(chest);
 
     PIXI.Ticker.shared.addOnce(() => {
-        if (!lootables || lootables.length === 0) {
-        console.warn("Lootables not ready!");
-        return;
-        }
+    if (!Array.isArray(lootables) || lootables.length === 0) {
+      console.warn("Lootables not ready!");
+      return;
+    }
 
-        const rarityRoll = Math.random();
-        let filtered;
-        if (rarityRoll < 0.10) filtered = lootables.filter(l => l.rarity === 'mythic');
-        else if (rarityRoll < 0.25) filtered = lootables.filter(l => l.rarity === 'rare');
-        else if (rarityRoll < 0.60) filtered = lootables.filter(l => l.rarity === 'uncommon');
-        else filtered = lootables.filter(l => l.rarity === 'common');
+    const roll = Math.random();
+    let pool;
+    if (roll < 0.10) pool = lootables.filter(l => l.rarity === 'mythic');
+    else if (roll < 0.25) pool = lootables.filter(l => l.rarity === 'rare');
+    else if (roll < 0.60) pool = lootables.filter(l => l.rarity === 'uncommon');
+    else pool = lootables.filter(l => l.rarity === 'common');
 
-        console.log("Rarity roll:", rarityRoll);
-        console.log("Filtered lootables:", filtered);
+    const item = pool[Math.floor(Math.random() * pool.length)];
+    console.log("Chest contains:", item);
 
-        const item = filtered[Math.floor(Math.random() * filtered.length)];
-        console.log("Chest contains:", item);
-
-        const onTick = () => {
+    const onTick = () => {
         const { x, y } = playerPositionRef.current;
         const dx = chest.x - x;
         const dy = chest.y - y;
@@ -45,7 +42,6 @@ const Chest = ({ app, container, playerPositionRef, boardSize, addToInventory, s
             app.ticker.remove(onTick);
         }
         };
-
         app.ticker.add(onTick);
     });
 
@@ -54,7 +50,6 @@ const Chest = ({ app, container, playerPositionRef, boardSize, addToInventory, s
         if (container.children.includes(chest)) container.removeChild(chest);
     };
     }, [app, container, playerPositionRef, boardSize]);
-
 
   return null;
 };

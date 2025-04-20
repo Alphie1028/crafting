@@ -268,6 +268,7 @@ function App() {
       setInCave={setInCave}
       setPortalVisible={setPortalVisible}
       boardSize={boardSize}
+      setTimer={setTimer}
     />,
     chestReady && !chestLoot && (
       <Chest
