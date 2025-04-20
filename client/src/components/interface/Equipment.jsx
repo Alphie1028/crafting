@@ -1,5 +1,5 @@
 import React from 'react';
-import './css/Equipment.css';
+import './css/equipment.css';
 
 const Equipment = ({equipment, draggedItem, setDraggedItem, draggedFrom, setDraggedFrom, onDrop, }) => {
   const handleMouseDown = (slot, index) => {
