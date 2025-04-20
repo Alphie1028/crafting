@@ -3,8 +3,8 @@ const craftables = [
     name: "Stone Sword",
     id: "stone-sword",
     requires: [
-        { type: "rock", count: 1 },
-        { type: "wood", count: 1 }
+        { type: "rock", count: 5 },
+        { type: "wood", count: 5 }
     ],
     gives: { type: "stone sword", count: 1 },
     extra: {
