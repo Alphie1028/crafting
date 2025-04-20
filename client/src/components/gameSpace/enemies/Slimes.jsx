@@ -12,75 +12,90 @@ const PLAYER_RADIUS = 12.5;
 
 const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef }) => {
     useEffect(() => {
-        if (!app || !container) return;
+    if (!app || !container) return;
 
-        const slimes = [];
-        const count = Math.floor(Math.random() * (MAX_SLIMES - MIN_SLIMES + 1)) + MIN_SLIMES;
+    const slimes = [];
+    if (slimesRef) slimesRef.current = slimes;
 
+    const spawnSlimes = (count) => {
         for (let i = 0; i < count; i++) {
-            const slime = new PIXI.Graphics();
-            slime.beginFill(SLIME_COLOR);
-            slime.drawCircle(0, 0, SLIME_RADIUS);
-            slime.endFill();
+        const slime = new PIXI.Graphics();
+        slime.beginFill(SLIME_COLOR);
+        slime.drawCircle(0, 0, SLIME_RADIUS);
+        slime.endFill();
 
-            slime.x = Math.random() * (app.screen.width  - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS - boardSize / 2;
-            slime.y = Math.random() * (app.screen.height - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS - boardSize / 2;
+        slime.x = Math.random() * (app.screen.width - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS - boardSize / 2;
+        slime.y = Math.random() * (app.screen.height - PADDING * 2 - SLIME_RADIUS * 2) + PADDING + SLIME_RADIUS - boardSize / 2;
 
-            container.addChild(slime);
-            slimes.push(slime);
+        container.addChild(slime);
+        slimes.push(slime);
+        }
+    };
+
+    spawnSlimes(Math.floor(Math.random() * (MAX_SLIMES - MIN_SLIMES + 1)) + MIN_SLIMES);
+
+    const interval = setInterval(() => {
+        const count = Math.floor(Math.random() * 5) + 1;
+        spawnSlimes(count);
+    }, 2000);
+
+    const timeout = setTimeout(() => {
+        clearInterval(interval);
+    }, 60000);
+
+    const tickerCb = () => {
+        const playerPos = playerPositionRef?.current;
+        if (!playerPos) return;
+
+        for (const slime of slimes) {
+        const dx = playerPos.x - slime.x;
+        const dy = playerPos.y - slime.y;
+        const distToPlayer = Math.hypot(dx, dy);
+
+        if (distToPlayer > SLIME_RADIUS + PLAYER_RADIUS + 2) {
+            const angle = Math.atan2(dy, dx);
+            slime.x += Math.cos(angle) * SLIME_SPEED;
+            slime.y += Math.sin(angle) * SLIME_SPEED;
+        } else {
+            const repelAngle = Math.atan2(dy, dx);
+            slime.x -= Math.cos(repelAngle) * (SLIME_SPEED * 0.5);
+            slime.y -= Math.sin(repelAngle) * (SLIME_SPEED * 0.5);
+        }
         }
 
-        const tickerCb = () => {
-            const playerPos = playerPositionRef?.current;
-            if (!playerPos) return;
+        for (let i = 0; i < slimes.length; i++) {
+        for (let j = i + 1; j < slimes.length; j++) {
+            const a = slimes[i];
+            const b = slimes[j];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const dist = Math.hypot(dx, dy);
 
-            for (const slime of slimes) {
-                const dx = playerPos.x - slime.x;
-                const dy = playerPos.y - slime.y;
-                const distToPlayer = Math.hypot(dx, dy);
+            if (dist < MIN_DISTANCE && dist > 0.01) {
+            const overlap = (MIN_DISTANCE - dist) / 2;
+            const angle = Math.atan2(dy, dx);
+            const offsetX = Math.cos(angle) * overlap;
+            const offsetY = Math.sin(angle) * overlap;
 
-                if (distToPlayer > SLIME_RADIUS + PLAYER_RADIUS + 2) {
-                    const angle = Math.atan2(dy, dx);
-                    slime.x += Math.cos(angle) * SLIME_SPEED;
-                    slime.y += Math.sin(angle) * SLIME_SPEED;
-                } else {
-                    const repelAngle = Math.atan2(dy, dx);
-                    slime.x -= Math.cos(repelAngle) * (SLIME_SPEED * 0.5);
-                    slime.y -= Math.sin(repelAngle) * (SLIME_SPEED * 0.5);
-                }
+            a.x -= offsetX;
+            a.y -= offsetY;
+            b.x += offsetX;
+            b.y += offsetY;
             }
+        }
+        }
+    };
 
-            for (let i = 0; i < slimes.length; i++) {
-                for (let j = i + 1; j < slimes.length; j++) {
-                const a = slimes[i];
-                const b = slimes[j];
+    app.ticker.add(tickerCb);
 
-                const dx = b.x - a.x;
-                const dy = b.y - a.y;
-                const dist = Math.hypot(dx, dy);
+    return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+        slimes.forEach(s => container.removeChild(s));
+        app.ticker.remove(tickerCb);
+    };
+    }, [app, container, playerPositionRef, boardSize, slimesRef]);
 
-                if (dist < MIN_DISTANCE && dist > 0.01) {
-                    const overlap = (MIN_DISTANCE - dist) / 2;
-                    const angle = Math.atan2(dy, dx);
-                    const offsetX = Math.cos(angle) * overlap;
-                    const offsetY = Math.sin(angle) * overlap;
-
-                    a.x -= offsetX;
-                    a.y -= offsetY;
-                    b.x += offsetX;
-                    b.y += offsetY;
-                }
-                }
-            }
-        };
-        if (slimesRef) slimesRef.current = slimes;
-        app.ticker.add(tickerCb);
-
-        return () => {
-            slimes.forEach(s => container.removeChild(s));
-            app.ticker.remove(tickerCb);
-        };
-    }, [app, container, playerPositionRef]);
 
     return null;
 };
