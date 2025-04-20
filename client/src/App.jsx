@@ -27,6 +27,7 @@ function App() {
   const [inCave, setInCave] = useState(false);
   const playerPositionRef = useRef({ x: 0, y: 0 });
   const [equipment, setEquipment] = useState([]);
+  const slimesRef = useRef([]);
 
   const handleItemDrop = (targetContainer, targetIndex) => {
     if (!draggedItem || !draggedFrom) return;
@@ -203,8 +204,8 @@ function App() {
 
   const caveElements = useMemo(() => [
     <Player key="player-cave" addToInventory={addToInventory} playerPositionRef={playerPositionRef}/>,
-    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef}/>,
-    <InUse key="in-use" equipment={equipment} playerPositionRef={playerPositionRef} inCave={inCave}/>,
+    <Slimes key="slimes-cave" playerPositionRef={playerPositionRef} slimesRef={slimesRef}/>,
+    <InUse key="in-use" equipment={equipment} playerPositionRef={playerPositionRef} inCave={inCave} slimesRef={slimesRef}/>,
   ],[addToInventory, equipment, playerPositionRef, inCave]);
 
 return (

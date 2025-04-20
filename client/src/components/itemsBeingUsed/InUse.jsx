@@ -1,7 +1,7 @@
 import React from 'react'
 import Sword from './items/Sword'
 
-const InUse = ({ app, container, equipment, playerPositionRef, inCave, boardSize }) => {
+const InUse = ({ app, container, equipment, playerPositionRef, inCave, boardSize, slimesRef }) => {
   console.log('InUse render → inCave:', inCave, 'equipment:', equipment)
   if (!inCave) return null
 
@@ -9,7 +9,7 @@ const InUse = ({ app, container, equipment, playerPositionRef, inCave, boardSize
   console.log('InUse → hasStoneSword?', hasStoneSword)
 
   return hasStoneSword
-    ? <Sword app={app} container={container} playerPositionRef={playerPositionRef} boardSize={boardSize}/>
+    ? <Sword app={app} container={container} playerPositionRef={playerPositionRef} boardSize={boardSize} slimesRef={slimesRef}/>
     : null
 }
 

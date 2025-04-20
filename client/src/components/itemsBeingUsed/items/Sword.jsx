@@ -10,7 +10,7 @@ const VARIANTS = {
   },
 };
 
-const Sword = ({ app, container, playerPositionRef, variant = 'stone' }) => {
+const Sword = ({ app, container, playerPositionRef, variant = 'stone', slimesRef }) => {
   const bladeRef = useRef(null);
 
   useEffect(() => {
@@ -36,6 +36,24 @@ const Sword = ({ app, container, playerPositionRef, variant = 'stone' }) => {
       blade.y = y;
       blade.rotation = angle;
 
+      const tipX = x + Math.cos(angle) * variantProps.height;
+      const tipY = y + Math.sin(angle) * variantProps.height;
+
+      if (slimesRef?.current) {
+        for (let i = slimesRef.current.length - 1; i >= 0; i--) {
+          const slime = slimesRef.current[i];
+          const dx = tipX - slime.x;
+          const dy = tipY - slime.y;
+          const distance = Math.hypot(dx, dy);
+
+          if (distance < 15 + variantProps.width / 2) {
+            console.log(`Hit slime ${i}!`);
+            container.removeChild(slime);
+            slimesRef.current.splice(i, 1);
+          }
+        }
+      }
+
       angle += 0.1;
     };
 
@@ -48,7 +66,7 @@ const Sword = ({ app, container, playerPositionRef, variant = 'stone' }) => {
         blade.destroy();
       }
     };
-  }, [app, container, playerPositionRef, variant]);
+  }, [app, container, playerPositionRef, variant, slimesRef]);
 
   return null;
 };

@@ -10,7 +10,7 @@ const SLIME_SPEED = 1.2;
 const MIN_DISTANCE = SLIME_RADIUS * 2.2;
 const PLAYER_RADIUS = 12.5;
 
-const Slimes = ({ app, container, playerPositionRef, boardSize }) => {
+const Slimes = ({ app, container, playerPositionRef, boardSize, slimesRef }) => {
     useEffect(() => {
         if (!app || !container) return;
 
@@ -73,7 +73,7 @@ const Slimes = ({ app, container, playerPositionRef, boardSize }) => {
                 }
             }
         };
-
+        if (slimesRef) slimesRef.current = slimes;
         app.ticker.add(tickerCb);
 
         return () => {
